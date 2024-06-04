@@ -8,7 +8,6 @@ from maps import map01
 
 pg.init()
 
-
 display = pg.display.set_mode((1024, 768))
 pg.display.set_caption('RE: Metal Warriors V2.0')
 

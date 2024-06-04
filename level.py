@@ -37,6 +37,26 @@ class Level:
     def check_events(self):
         pass
 
+    def camera_center(self, player, tiles):
+        shift = 0
+        y_limit = [200, 400, False]
+        width = self.main.width / 4
+
+        if player.rect.center[0] < width:
+            shift = int((width - player.rect.center[0]) / 4)
+            player.rect.x += shift
+        elif player.rect.center[0] > width:
+            shift = int((player.rect.center[0] - width) / 4) 
+            player.rect.x += (shift * -2) / 2
+
+        for tile in tiles:
+            if player.rect.center[0] < width:
+                tile.world_shift.x = shift
+            elif player.rect.center[0] > width:
+                tile.world_shift.x = shift - (shift * 2)
+            else:
+                tile.world_shift.x = 0
+
     def check_collide(self, player, tiles):
         list = []
         for tile in tiles:
@@ -49,12 +69,12 @@ class Level:
             if player.axis.x < 0:
                 player.rect.left = tile_collide.rect.right
                 player.on_left = True
-                #player.axis.x = 0
+                player.axis.x = int(player.axis.x / 2)
                 self.last_x_collide = player.rect.left
             if player.axis.x > 0:
                 player.rect.right = tile_collide.rect.left
                 player.on_right = True
-                #player.axis.x = 0
+                player.axis.x = int(player.axis.x / 2)
                 self.last_x_collide = player.rect.right
 
     def y_collide(self, player, tiles):
@@ -81,6 +101,7 @@ class Level:
         self.y_collide(player, tiles)
         player.apply_movement()
         self.x_collide(player, tiles)
+        self.camera_center(player, tiles)
 
         if player.on_left and player.rect.left != self.last_x_collide:
             player.on_left = False

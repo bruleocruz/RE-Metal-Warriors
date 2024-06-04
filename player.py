@@ -39,6 +39,9 @@ class Nitro(pg.sprite.Sprite):
     def command_button(self):
         keys = pg.key.get_pressed()
 
+        if keys[pg.K_SPACE]:
+            self.rect.center = pg.mouse.get_pos()
+
         if self.on_ground:
             if keys[pg.K_DOWN]:
                 self.axis.y = -24

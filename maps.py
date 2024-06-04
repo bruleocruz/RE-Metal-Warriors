@@ -1,0 +1,12 @@
+map01 = ['baaaaaabaaaaaaaa',
+         'bacaaabaaabaaaaa',
+         'baaaabaaaabaaaaa',
+         'bbbbbbbbbbbaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',
+         'aaaaaaaaaaaaaaaa',]

@@ -46,13 +46,11 @@ class Nitro(pg.sprite.Sprite):
             if keys[pg.K_DOWN]:
                 self.axis.y = -24
         if keys[pg.K_a]:
-            if not self.on_left:
-                self.axis.x -= 0.5
-                self.face_right = False
+            self.axis.x -= 0.5
+            self.face_right = False
         elif keys[pg.K_d]:
-            if not self.on_right:
-                self.axis.x += 0.5
-                self.face_right = True
+            self.axis.x += 0.5
+            self.face_right = True
         else:
             self.accel_reset()
         

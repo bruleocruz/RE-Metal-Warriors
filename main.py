@@ -16,8 +16,8 @@ class Main:
         self.display = display
 
         self.tile_set = 128
-        self.width = self.tile_set * 16
-        self.height = self.tile_set * 12
+        self.width = 1024
+        self.height = 768
         self.main_screen = pg.Surface((self.width, self.height))
         self.main_screen.fill('black')
         self.fps = pg.time.Clock()
@@ -36,7 +36,7 @@ class Main:
         # MAIN MENU
         self.nitro_menu_path = 'sprites/chars/nitro/walk/'
         self.nitro_loop = {'sprites': [self.nitro_menu_path + '00.png',
-                                       self.nitro_menu_path + '01.png',
+                                       self.nitro_menu_path + '01.png', 
                                        self.nitro_menu_path + '02.png',
                                        self.nitro_menu_path + '03.png',
                                        self.nitro_menu_path + '04.png',

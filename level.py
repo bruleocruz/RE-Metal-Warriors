@@ -1,7 +1,7 @@
 import pygame as pg
 from tiles import InteractibleTile, NotInteractibleTile
 from player import Nitro
-from config import debug
+from config import debug, n_p, p_n
 
 
 class Level:
@@ -34,28 +34,34 @@ class Level:
                     create_player = Nitro(x_pos, y_pos)
                     self.player.add(create_player)
 
-    def check_events(self):
-        pass
+    def player_camera_limit(self, player, tiles):
+        l_limit = [(self.main.width / 2) - 200, False]
+        r_limit = [(self.main.width / 2) + 200, False]
+        u_limit = [(self.main.height / 2) - 200, False]
+        d_limit = [(self.main.height / 2) + 200, False]
 
-    def camera_center(self, player, tiles):
-        shift = 0
-        y_limit = [200, 400, False]
-        width = self.main.width / 4
-
-        if player.rect.center[0] < width:
-            shift = int((width - player.rect.center[0]) / 4)
-            player.rect.x += shift
-        elif player.rect.center[0] > width:
-            shift = int((player.rect.center[0] - width) / 4) 
-            player.rect.x += (shift * -2) / 2
+        if player.rect.left <= l_limit[0]:
+            player.rect.left = l_limit[0]
+            l_limit[1] = True
+        elif player.rect.right >= r_limit[0]:
+            player.rect.right = r_limit[0]
+            r_limit[1] = True
+        if player.rect.top <= u_limit[0]:
+            player.rect.top = u_limit[0]
+            u_limit[1] = True
+        elif player.rect.bottom >= d_limit[0]:
+            player.rect.bottom = d_limit[0]
+            d_limit[1] = True     
 
         for tile in tiles:
-            if player.rect.center[0] < width:
-                tile.world_shift.x = shift
-            elif player.rect.center[0] > width:
-                tile.world_shift.x = shift - (shift * 2)
-            else:
-                tile.world_shift.x = 0
+            if l_limit[1]:
+                tile.rect.x += n_p(player.axis.x)
+            elif r_limit[1]:
+                tile.rect.x += p_n(player.axis.x)
+            if u_limit[1]:
+                tile.rect.y += n_p(player.axis.y)
+            elif d_limit[1]:
+                tile.rect.y += p_n(player.axis.y)
 
     def check_collide(self, player, tiles):
         list = []
@@ -69,12 +75,12 @@ class Level:
             if player.axis.x < 0:
                 player.rect.left = tile_collide.rect.right
                 player.on_left = True
-                player.axis.x = int(player.axis.x / 2)
+                player.axis.x = 0
                 self.last_x_collide = player.rect.left
             if player.axis.x > 0:
                 player.rect.right = tile_collide.rect.left
                 player.on_right = True
-                player.axis.x = int(player.axis.x / 2)
+                player.axis.x = 0
                 self.last_x_collide = player.rect.right
 
     def y_collide(self, player, tiles):
@@ -101,7 +107,7 @@ class Level:
         self.y_collide(player, tiles)
         player.apply_movement()
         self.x_collide(player, tiles)
-        self.camera_center(player, tiles)
+        self.player_camera_limit(player, tiles)
 
         if player.on_left and player.rect.left != self.last_x_collide:
             player.on_left = False
@@ -113,9 +119,9 @@ class Level:
         else:
             player.stand = False
 
-        if player.on_ceiling and player.axis.y != 0:
+        if player.on_ceiling and player.axis.y > 0 or player.on_ceiling and player.on_ground:
             player.on_ceiling = False
-        if player.on_ground and player.axis.y != 0:
+        if player.on_ground and player.axis.y != 0 or player.on_ground and player.on_ceiling:
             player.on_ground = False
 
     def player_info(self):
@@ -156,4 +162,5 @@ class Level:
 
         self.interactible_tiles.draw(self.game.screen)
         self.player.draw(self.game.screen)
+
         self.player_info()

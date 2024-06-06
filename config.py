@@ -18,3 +18,9 @@ def debug(screen,
     else:
         text = def_font.render(f'{info}', True, color)
     screen.blit(text, pos)
+
+def n_p(x):
+    return int((x * -2) / 2)
+
+def p_n(x):
+    return int(x - (x * 2))

@@ -10,16 +10,22 @@ SPRITE_PATH = 'sprites/'
 def debug(screen, 
           font_path='Manaspace.ttf',
           font_size=0,
-          condition=False,
-          pre_info='', 
-          info='', 
-          color=(0, 0, 0), 
+          condition=False,  # Parâmetro para mostrar uma pré informação editável antes da principal, como uma explicação;
+          pre_info='',  # Informação editável;
+          info='',  # Informação principal;
+          bool=False, # Caso a informação seja boleana, esse parâmetro irá mostrar 'True' em verde e 'False' em vermelho;
+          color1=(255, 0, 0),  # Vermelho;
+          color2=(0, 255, 0),  # Verde;
+          color3=(255, 255, 255),  # Branco;
           pos=(0, 0)):
     def_font = pg.font.Font(font_path, font_size)
     if condition:
-        text = def_font.render(f'{pre_info}: {info}', True, color)
+        if bool:
+            text = def_font.render(f'{pre_info}: {info}', True, color1 if not info else color2)
+        else:
+            text = def_font.render(f'{pre_info}: {info}', True, color3)
     else:
-        text = def_font.render(f'{info}', True, color)
+        text = def_font.render(f'{info}', True, color3)
     screen.blit(text, pos)
 
 def n_p(x):  # CONVERT NEGATIVE TO POSITIVE;

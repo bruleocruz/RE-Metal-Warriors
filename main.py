@@ -31,7 +31,7 @@ class Main:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.on = False
-            if event.type == pg.KEaaaYDOWN:
+            if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.on = False
                 if event.key == pg.K_g:
@@ -47,10 +47,9 @@ class Main:
                    
             if self.game_playing:
                 self.game.run()
-
+            
             pg.display.update()
             self.fps.tick(60)
-            
 
 main = Main(128)
 main.run()

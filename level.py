@@ -69,23 +69,6 @@ class Level:
             player.on_left = False
         if player.on_right and player.movement.x != 0:
             player.on_right = False
-        
-        debug(self.main.screen, 
-              'ARIAL.TTF',
-              16,
-              True,
-              'On Left',
-              player.on_left,
-              (255, 255, 255),
-              (16, 48))
-        debug(self.main.screen, 
-              'ARIAL.TTF',
-              16,
-              True,
-              'On Right',
-              player.on_right,
-              (255, 255, 255),
-              (16, 64))
     
     def apply_y_collision(self, player, tiles):
         for tile in tiles:
@@ -104,23 +87,6 @@ class Level:
             player.on_ceiling = False
         if player.on_ground and player.movement.y != 0:
             player.on_ground = False
-
-        debug(self.main.screen, 
-              'ARIAL.TTF',
-              16,
-              True,
-              'On Ceiling',
-              player.on_ceiling,
-              (255, 255, 255),
-              (16, 16))
-        debug(self.main.screen, 
-              'ARIAL.TTF',
-              16,
-              True,
-              'On Ground',
-              player.on_ground,
-              (255, 255, 255),
-              (16, 32))
     
     def center_player(self, player, tiles):
         x_value = 0
@@ -181,3 +147,80 @@ class Level:
         self.tiles.draw(self.main.screen)
         self.player.draw(self.main.screen)
 
+
+        # DEBUG SPACE;
+        if self.game.set_debug:
+            ############################################ BLOCO 1;
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'Ceiling',
+                self.player.sprite.on_ceiling,
+                True,
+                pos=(0, 0))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'Ground',
+                self.player.sprite.on_ground,
+                True,
+                pos=(0, 16))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'Left',
+                self.player.sprite.on_left,
+                True,
+                pos=(0, 32))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'Right',
+                self.player.sprite.on_right,
+                True,
+                pos=(0, 48))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'Stand',
+                self.player.sprite.stand,
+                True,
+                pos=(0, 64))
+            ############################################ BLOCO 2;
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'movement x',
+                self.player.sprite.movement.x,
+                False,
+                pos=(128, 0))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'movement y',
+                self.player.sprite.movement.y,
+                False,
+                pos=(128, 16))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'pos x',
+                self.player.sprite.rect.x,
+                False,
+                pos=(128, 32))
+            debug(self.main.screen, 
+                'ARIAL.TTF',
+                16,
+                True,
+                'pos y',
+                self.player.sprite.rect.y,
+                False,
+                pos=(128, 48))

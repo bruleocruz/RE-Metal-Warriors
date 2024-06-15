@@ -36,18 +36,32 @@ class Nitro(pg.sprite.Sprite):
     def input(self):
         keys = pg.key.get_pressed()
 
-        if keys[pg.K_DOWN]:
-            self.gravity = -16
-
-        if keys[pg.K_a]:
-            self.movement.x -= 1
-            self.face_right = False
-        elif keys[pg.K_d]:
-            self.movement.x += 1
-            self.face_right = True
+        # STATES DE ANIMAÇÃO ÚNICA;
+        if self.state == 'saber_down':
+            pass
         else:
-            self.reset_speed()
+            if keys[pg.K_DOWN]:
+                self.gravity = -16
+
+            if keys[pg.K_a]:
+                self.movement.x -= 1
+                self.face_right = False
+            elif keys[pg.K_d]:
+                self.movement.x += 1
+                self.face_right = True
+            
+            elif keys[pg.K_RIGHT]:
+                if self.on_ground:
+                    self.state == 'saber_down'
+                else:
+                    self.reset_speed()
+            else:
+                self.reset_speed()
         
+        if self.movement.x == 0 and self.on_ground:
+            self.stand = True
+        else:
+            self.stand = False
         self.speed_limit()
     
     def reset_speed(self):

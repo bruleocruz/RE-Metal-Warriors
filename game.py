@@ -1,25 +1,28 @@
 import pygame as pg
+from level import Level
 
 
 class Game:
-    def __init__(self, main):
+    def __init__(self, main, map):
         self.main = main
-        self.screen = pg.Surface(((self.main.tile_set * 64), (self.main.tile_set * 64)))
+        self.map = map
+
+        self.level = Level(self.main, self, self.map)
 
     def check_events(self):
         for event in pg.event.get():
-            # SHUTTING THE GAME;
             if event.type == pg.QUIT:
                 self.main.on = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.main.on = False
-
-                # SWITCH TO MAIN;
                 if event.key == pg.K_m:
-                    self.main.main_playing = True
+                    self.main.playing = True
                     self.main.game_playing = False
-                # SWITCH TO EDITOR;
-                if event.key == pg.K_e:
-                    self.main.editor_playing = True
-                    self.main.game_playing = False
+    
+    def run(self):
+        self.check_events()
+        self.main.screen.fill('black')
+        self.level.run()
+
+        self.main.display.blit(self.main.screen, (0, 0))

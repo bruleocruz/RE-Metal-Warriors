@@ -1,7 +1,8 @@
 import pygame as pg
-from tiles import InteractibleTile, NotInteractibleTile
-from player import Nitro
-from config import debug, n_p, p_n
+from tiles import Tile
+from pygame.image import load
+from entity import Nitro
+from config import *
 
 
 class Level:
@@ -10,157 +11,173 @@ class Level:
         self.game = game
         self.map = map
 
-        self.last_x_collide = ()
-
-        # GROUPS;
-        self.interactible_tiles = pg.sprite.Group()
-        self.notinteractibletiles = pg.sprite.Group()
+        self.tiles = pg.sprite.Group()
         self.player = pg.sprite.GroupSingle()
 
-        self.set_level()
-    
-    def set_level(self):
-        for y, y_index in enumerate(self.map):
+        self.set_level(map)
+
+    def set_level(self, map):
+        for y, y_index in enumerate(map):
             for x, x_index in enumerate(y_index):
                 x_pos = x * self.main.tile_set
                 y_pos = y * self.main.tile_set
 
                 if x_index == 'b':
-                    create_tile = InteractibleTile(x_pos, y_pos, pg.Surface((128, 128)))
-                    self.interactible_tiles.add(create_tile)
-                
+                    create_tile = Tile(load('sprites/wall000.png').convert_alpha(), (x_pos, y_pos), 'collide', 0)
+                    self.tiles.add(create_tile)
+
                 # PLAYER;
                 if x_index == 'c':
-                    create_player = Nitro(x_pos, y_pos)
+                    create_player = Nitro('', (x_pos, y_pos))
                     self.player.add(create_player)
+    
+    def camera_limit(self, player):
+            width = self.main.width / 2
+            height = self.main.height / 2
+            x_limit = [False, False]
 
-    def player_camera_limit(self, player, tiles):
-        l_limit = [(self.main.width / 2) - 200, False]
-        r_limit = [(self.main.width / 2) + 200, False]
-        u_limit = [(self.main.height / 2) - 200, False]
-        d_limit = [(self.main.height / 2) + 200, False]
-
-        if player.rect.left <= l_limit[0]:
-            player.rect.left = l_limit[0]
-            l_limit[1] = True
-        elif player.rect.right >= r_limit[0]:
-            player.rect.right = r_limit[0]
-            r_limit[1] = True
-        if player.rect.top <= u_limit[0]:
-            player.rect.top = u_limit[0]
-            u_limit[1] = True
-        elif player.rect.bottom >= d_limit[0]:
-            player.rect.bottom = d_limit[0]
-            d_limit[1] = True     
-
-        for tile in tiles:
-            if l_limit[1]:
-                tile.rect.x += n_p(player.axis.x)
-            elif r_limit[1]:
-                tile.rect.x += p_n(player.axis.x)
-            if u_limit[1]:
-                tile.rect.y += n_p(player.axis.y)
-            elif d_limit[1]:
-                tile.rect.y += p_n(player.axis.y)
-
-    def check_collide(self, player, tiles):
+            if player.rect.x < width - 200:
+                player.rect.x = width - 200
+                x_limit[0] = True
+            if player.rect.x > width + 200 - 128:
+                player.rect.x = width + 200 - 128
+                x_limit[1] = True
+            
+            return x_limit        
+    
+    def check_collision(self, player, tiles):
         list = []
+
         for tile in tiles:
             if player.rect.colliderect(tile):
                 list.append(tile)
+        
         return list
 
-    def x_collide(self, player, tiles):
-        for tile_collide in self.check_collide(player, tiles):
-            if player.axis.x < 0:
-                player.rect.left = tile_collide.rect.right
+    def apply_x_collision(self, player, tiles):
+        for tile in tiles:
+            if player.movement.x < 0:
+                player.rect.left = tile.rect.right
+                player.movement.x = 0
                 player.on_left = True
-                player.axis.x = 0
-                self.last_x_collide = player.rect.left
-            if player.axis.x > 0:
-                player.rect.right = tile_collide.rect.left
+            if player.movement.x > 0:
+                player.rect.right = tile.rect.left
+                player.movement.x = 0
                 player.on_right = True
-                player.axis.x = 0
-                self.last_x_collide = player.rect.right
-
-    def y_collide(self, player, tiles):
-        for tile_collide in self.check_collide(player, tiles):
-            if tiles:
-                if player.axis.y > 0:
-                    player.rect.bottom = tile_collide.rect.top
-                    player.on_ground = True
-                    player.axis.y = 0
-                elif player.axis.y < 0:
-                    player.rect.top = tile_collide.rect.bottom
-                    player.on_ceiling = True
-                    player.axis.y = 0
-    
-    def apply_collides(self):
-        player = self.player.sprite
-        tiles = self.interactible_tiles.sprites()
-
-        # THE PLAYER ACCELERATION AND GRAVITY WILL BE APPLIED HERE;
-        player.command_button()
-        player.gravity()
-
-        player.apply_gravity()
-        self.y_collide(player, tiles)
-        player.apply_movement()
-        self.x_collide(player, tiles)
-        self.player_camera_limit(player, tiles)
-
-        if player.on_left and player.rect.left != self.last_x_collide:
+        
+        if player.on_left and player.movement.x != 0:
             player.on_left = False
-        if player.on_right and player.rect.right != self.last_x_collide:
+        if player.on_right and player.movement.x != 0:
             player.on_right = False
-
-        if player.on_ground and player.axis.x == 0 and player.axis.y == 0:
-            player.stand = True
-        else:
-            player.stand = False
-
-        if player.on_ceiling and player.axis.y > 0 or player.on_ceiling and player.on_ground:
+        
+        debug(self.main.screen, 
+              'ARIAL.TTF',
+              16,
+              True,
+              'On Left',
+              player.on_left,
+              (255, 255, 255),
+              (16, 48))
+        debug(self.main.screen, 
+              'ARIAL.TTF',
+              16,
+              True,
+              'On Right',
+              player.on_right,
+              (255, 255, 255),
+              (16, 64))
+    
+    def apply_y_collision(self, player, tiles):
+        for tile in tiles:
+            if player.movement.y < 0:
+                player.rect.top = tile.rect.bottom
+                player.movement.y = 0
+                player.gravity = 0
+                player.on_ceiling = True
+            if player.movement.y > 0:
+                player.rect.bottom = tile.rect.top
+                player.movement.y = 0
+                player.gravity = 0
+                player.on_ground = True
+            
+        if player.on_ceiling and player.movement.y != 0:
             player.on_ceiling = False
-        if player.on_ground and player.axis.y != 0 or player.on_ground and player.on_ceiling:
+        if player.on_ground and player.movement.y != 0:
             player.on_ground = False
 
-    def player_info(self):
-        font = pg.font.Font('ARIAL.ttf', 16)
-        player = self.player.sprite
+        debug(self.main.screen, 
+              'ARIAL.TTF',
+              16,
+              True,
+              'On Ceiling',
+              player.on_ceiling,
+              (255, 255, 255),
+              (16, 16))
+        debug(self.main.screen, 
+              'ARIAL.TTF',
+              16,
+              True,
+              'On Ground',
+              player.on_ground,
+              (255, 255, 255),
+              (16, 32))
+    
+    def center_player(self, player, tiles):
+        x_value = 0
+        y_value = 0
+        distance = 16  # Quanto maior essa variável, menor será o valor que irá puxar o player para o centro da tela, 
+                       # resultando em uma distancia maior de locomoção para longe do centro;
 
-        # GET INFO;
-        state = font.render(f'State: {player.state}', True, (255, 255, 255))
-        index = font.render(f'Index: {player.index:.0f}', True, (255, 255, 255))
-        ceiling = font.render(f'On Ceiling: {player.on_ceiling}', True, (0, 255, 0) if player.on_ceiling else (255, 0, 0))
-        ground = font.render(f'On Ground: {player.on_ground}', True, (0, 255, 0) if player.on_ground else (255, 0, 0))
-        left = font.render(f'On Left: {player.on_left}', True, (0, 255, 0) if player.on_left else (255, 0, 0))
-        right = font.render(f'On Right: {player.on_right}', True, (0, 255, 0) if player.on_right else (255, 0, 0))
-        stand = font.render(f'Stand: {player.stand}', True, (0, 255, 0) if player.stand else (255, 0, 0))
-        x_pos = font.render(f'Pos X: {player.rect.x}', True, (255, 255, 255))
-        y_pos = font.render(f'Pos Y: {player.rect.y}', True, (255, 255, 255))
-        axis_x = font.render(f'Speed: {player.axis.x}', True, (255, 255, 255))
-        axis_y = font.render(f'Gravity: {player.axis.y}', True, (255, 255, 255))
-         
-        # BLIT SPACE;
-        self.game.screen.blit(state, (0, 0))
-        self.game.screen.blit(index, (0, 16))
-        self.game.screen.blit(ceiling, (0, 32))
-        self.game.screen.blit(ground, (0, 48))
-        self.game.screen.blit(left, (0, 64))
-        self.game.screen.blit(right, (0, 80))
-        self.game.screen.blit(stand, (0, 96))
-        self.game.screen.blit(x_pos, (128, 0))
-        self.game.screen.blit(y_pos, (128, 16))
-        self.game.screen.blit(axis_x, (128, 32))
-        self.game.screen.blit(axis_y, (128, 48))        
+        if player.rect.center[0] < self.main.width / 2:
+            x_value = int((self.main.width / 2 - player.rect.center[0]) / distance)
+            player.rect.x += x_value
+        if player.rect.center[0] > self.main.width / 2:
+            x_value = int((self.main.width / 2 - player.rect.center[0]) / distance)
+            player.rect.x += x_value
+        if player.rect.center[1] < self.main.height / 2:
+            y_value = int((self.main.height / 2 - player.rect.center[1]) / distance)
+            player.rect.y += y_value
+        if player.rect.center[1] > self.main.height / 2:
+            y_value = int((self.main.height / 2 - player.rect.center[1]) / distance)
+            player.rect.y += y_value
+
+        for tile in tiles:  # Movimentando todos os tiles junto com o player, para que não tenha problemas de colisão;
+            if player.rect.x < self.main.width / 2:
+                tile.rect.x += x_value
+            if player.rect.x > self.main.width / 2:
+                tile.rect.x += x_value
+            if player.rect.y < self.main.height / 2:
+                tile.rect.y += y_value
+            if player.rect.y > self.main.height / 2:
+                tile.rect.y += y_value
+    
+    def move(self):
+        player = self.player.sprite
+        tiles = self.tiles.sprites()
+
+        player.update()
+        player.apply_gravity()
+
+        # APLICANDO AS COLISÕES E CORRIGINDO A POSIÇÃO DO PLAYER COM OS TILES;
+        player.apply_movement_y()
+        self.apply_y_collision(player, self.check_collision(player, tiles)) 
+        player.apply_movement_x()
+        self.apply_x_collision(player, self.check_collision(player, tiles))
+
+        # MOVIMENTANDO OS TILES BASEADO NO MOVIMENTO DO PLAYER NO EIXO X;
+        limit = self.camera_limit(player)  # Essa variável retorna uma lista de dois valores boleanos, 
+                                           # que são trigados caso o player atinja o limite de distância em referencia ao meio da tela;
+        for tile in tiles:
+            if limit[0]:
+                tile.rect.x += n_p(player.movement.x)
+            if limit[1]:
+                tile.rect.x += p_n(player.movement.x)
+        
+        self.center_player(player, tiles)
 
     def run(self):
-        self.interactible_tiles.update()
-        self.player.update()
+        self.move()
 
-        self.apply_collides()
+        self.tiles.draw(self.main.screen)
+        self.player.draw(self.main.screen)
 
-        self.interactible_tiles.draw(self.game.screen)
-        self.player.draw(self.game.screen)
-
-        self.player_info()

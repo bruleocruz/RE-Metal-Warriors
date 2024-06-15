@@ -40,13 +40,13 @@ class Nitro(pg.sprite.Sprite):
         if self.state == 'saber_down':
             pass
         else:
-            if keys[pg.K_DOWN]:
+            if keys[pg.K_SPACE]:  # JUMP;
                 self.gravity = -16
 
-            if keys[pg.K_a]:
+            if keys[pg.K_a]:  # MOVE LEFT;
                 self.movement.x -= 1
                 self.face_right = False
-            elif keys[pg.K_d]:
+            elif keys[pg.K_d]:  # MOVE RIGHT;
                 self.movement.x += 1
                 self.face_right = True
             

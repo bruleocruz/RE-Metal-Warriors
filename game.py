@@ -10,7 +10,10 @@ class Game:
 
         self.level = Level(self.main, self, self.map)
 
-        self.set_debug = False
+        self.set_debug = True
+        self.debug_1 = False
+        self.debug_2 = False
+        self.debug_3 = True
 
     def check_events(self):
         for event in pg.event.get():
@@ -22,11 +25,27 @@ class Game:
                 if event.key == pg.K_m:
                     self.main.playing = True
                     self.main.game_playing = False
-                if event.key == pg.K_p:
+
+                if event.key == pg.K_0:
                     if self.set_debug:
                         self.set_debug = False
                     else:
                         self.set_debug = True
+                if event.key == pg.K_1:
+                    if self.debug_1:
+                        self.debug_1 = False
+                    else:
+                        self.debug_1 = True
+                if event.key == pg.K_2:
+                    if self.debug_2:
+                        self.debug_2 = False
+                    else:
+                        self.debug_2 = True
+                if event.key == pg.K_3:
+                    if self.debug_3:
+                        self.debug_3 = False
+                    else:
+                        self.debug_3 = True
     
     def run(self):
         self.check_events()

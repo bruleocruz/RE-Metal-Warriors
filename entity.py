@@ -1,6 +1,6 @@
 import pygame as pg
 from config import *
-
+from projectile import Shoot1
 
 class Nitro(pg.sprite.Sprite):
     def load_sprites():
@@ -12,6 +12,7 @@ class Nitro(pg.sprite.Sprite):
         self.type = type
         self.sprites = Nitro.load_sprites()
         self.state = 'walk'
+        self.last_state = 'walk'
         self.index = 0
         self.frame_skip = 0
 
@@ -28,6 +29,11 @@ class Nitro(pg.sprite.Sprite):
         self.on_ground = False
         self.stand = True
 
+        # EQUIPS;
+        self.shoots = pg.sprite.Group()
+        self.delay = 0
+        self.shoot_rate = 8
+
         # ANIMATION;
         self.image = self.sprites[self.state][self.index]
         self.rect = self.image.get_rect(topleft=(pos))
@@ -36,27 +42,48 @@ class Nitro(pg.sprite.Sprite):
     def input(self):
         keys = pg.key.get_pressed()
 
-        # STATES DE ANIMAÇÃO ÚNICA;
+        # SOLO STATES (States que impedem a mudança para outro state enquanto eles não acabam);
         if self.state == 'saber_down':
-            pass
-        else:
-            if keys[pg.K_SPACE]:  # JUMP;
-                self.gravity = -16
+            self.reset_speed()
+            return
 
-            if keys[pg.K_a]:  # MOVE LEFT;
-                self.movement.x -= 1
-                self.face_right = False
-            elif keys[pg.K_d]:  # MOVE RIGHT;
-                self.movement.x += 1
-                self.face_right = True
+        #  JUMP;
+        if keys[pg.K_DOWN]:  
+            self.gravity = -16
+        
+        #  SHOOTING;
+        if keys[pg.K_LEFT]:
+            if self.delay >= self.shoot_rate:
+                create_shoot = Shoot1(self,
+                                    self.sprites['shoot1'][0],
+                                    (self.rect.center[0] + 56, self.rect.center[1] - 24)  # Coordenadas da tela para que seja blitado onde está a ponta da arma;
+                                    if self.face_right 
+                                    else (self.rect.center[0] - 72, self.rect.center[1] - 24),  # Reajustando a posição caso o player esteja virado para a esquerda;
+                                    True if self.face_right else False)  # 'True' para o projetil seguir infinito para frente, 'False' para trás;
+                self.shoots.add(create_shoot)
+                self.delay = 0
+            else:
+                self.delay += 1
+            print(len(self.shoots))
             
-            elif keys[pg.K_RIGHT]:
-                if self.on_ground:
-                    self.state == 'saber_down'
-                else:
-                    self.reset_speed()
+        # MOVIMENTO DE TRÁS E FRENTE;
+        if keys[pg.K_a]:  # MOVE LEFT;
+            self.movement.x -= 1
+            self.face_right = False
+        elif keys[pg.K_d]:  # MOVE RIGHT;
+            self.movement.x += 1
+            self.face_right = True
+        if self.movement.x != 0 or self.movement.y != 0:
+            self.state = 'walk'
+        
+        # ATAQUE DE SABRE;
+        if keys[pg.K_RIGHT]:
+            if self.on_ground:
+                self.state = 'saber_down'
             else:
                 self.reset_speed()
+        else:
+            self.reset_speed()
         
         if self.movement.x == 0 and self.on_ground:
             self.stand = True
@@ -92,12 +119,32 @@ class Nitro(pg.sprite.Sprite):
         self.rect.y += int(self.movement.y)
     
     def state_config(self):
-        if self.movement.x != 0:
-            if self.state == 'walk':
+        keys = pg.key.get_pressed()
+
+        if self.state != self.last_state:  # RESETANDO O INDEX CASO MUDE DE STATE;
+            self.index = 0
+
+        if keys[pg.K_SPACE]:  # CONTROLANDO O INDEX MANUALMENTE;
+            if self.index >= len(self.sprites[self.state]) - 1:
+                self.index = 0
+            else:
+                self.index += 0.1
+
+        if self.state == 'walk':
+            if self.movement.x != 0 or self.movement.y != 0:
                 if self.index >= len(self.sprites[self.state]) - 1:
                     self.index = 0
                 else:
-                    self.index += 0.4
+                    self.index += 0.3
+
+        if self.state == 'saber_down':
+            if self.index > len(self.sprites[self.state]) - 1:
+                self.index = 0
+                self.state = 'walk'
+            else:
+                pass
+        
+        self.last_state = self.state
     
     def animation(self):
         # IMAGE CONFIG;

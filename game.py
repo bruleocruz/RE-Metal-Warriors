@@ -26,6 +26,7 @@ class Game:
                     self.main.playing = True
                     self.main.game_playing = False
 
+                # DEBUG KEYS CONFIG;
                 if event.key == pg.K_0:
                     if self.set_debug:
                         self.set_debug = False
@@ -46,6 +47,12 @@ class Game:
                         self.debug_3 = False
                     else:
                         self.debug_3 = True
+                
+                # FPS CHANGE;
+                if event.key == pg.K_LSHIFT:
+                    self.main.fps_tick -= 1
+                if event.key == pg.K_RSHIFT:
+                    self.main.fps_tick += 1
     
     def run(self):
         self.check_events()

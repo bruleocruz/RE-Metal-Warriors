@@ -88,7 +88,7 @@ class Level:
         if player.on_ground and player.movement.y != 0:
             player.on_ground = False
     
-    def center_player(self, player, tiles):
+    def center_player(self, player, tiles, shoots):
         x_value = 0
         y_value = 0
         distance = 16  # Quanto maior essa variável, menor será o valor que irá puxar o player para o centro da tela, 
@@ -116,9 +116,27 @@ class Level:
                 tile.rect.y += y_value
             if player.rect.y > self.main.height / 2:
                 tile.rect.y += y_value
+        
+        for shoot in shoots:  # Mesmo processo de cima, porém agora com os projeteis (provavelmente terá que fazer isso com muitos elementos...);
+            shoot.update()
+
+            if player.rect.x < self.main.width / 2:
+                shoot.rect.x += x_value
+            if player.rect.x > self.main.width / 2:
+                shoot.rect.x += x_value
+            if player.rect.y < self.main.height / 2:
+                shoot.rect.y += y_value
+            if player.rect.y > self.main.height / 2:
+                shoot.rect.y += y_value
+                
+            if shoot.rect.x > self.main.width or shoot.rect.x < 0:
+                shoot.kill()  # Método da classe 'sprite.Group' que deleta o sprite caso algo aconteça;
+            if shoot.rect.y > self.main.height or shoot.rect.y < 0:
+                shoot.kill()
     
     def move(self):
         player = self.player.sprite
+        shoots = player.shoots.sprites()
         tiles = self.tiles.sprites()
 
         player.update()
@@ -139,7 +157,7 @@ class Level:
             if limit[1]:
                 tile.rect.x += p_n(player.movement.x)
         
-        self.center_player(player, tiles)
+        self.center_player(player, tiles, shoots)
     
     def debug(self, player):
         # DEBUG SPACE;
@@ -244,4 +262,6 @@ class Level:
 
         self.tiles.draw(self.main.screen)
         self.player.draw(self.main.screen)
+        self.player.sprite.shoots.draw(self.main.screen)
         self.debug(self.player.sprite)
+    

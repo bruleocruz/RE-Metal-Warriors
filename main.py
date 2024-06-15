@@ -3,7 +3,6 @@ from game import Game
 from entity import Nitro
 from config import *
 from maps import *
-import sys
 
 
 pg.init()
@@ -16,6 +15,7 @@ class Main:
         self.height = tile_set * 6
         self.display = pg.display.set_mode((self.width, self.height))
         self.fps = pg.time.Clock()
+        self.fps_tick = 60
 
         self.screen = pg.Surface((self.width, self.height))
 
@@ -49,7 +49,7 @@ class Main:
                 self.game.run()
             
             pg.display.update()
-            self.fps.tick(60)
+            self.fps.tick(self.fps_tick)
 
 main = Main(128)
 main.run()
